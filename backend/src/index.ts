@@ -13,9 +13,7 @@ import { getEnv } from './lib/env';
 const env=getEnv();
 const app=express();
 
-app.get('/',(req,res)=>{
-    res.send("hello Developer")
-});
+
 
 const rawJson=express.raw({type:"application/json",limit:"1mb"});
 
