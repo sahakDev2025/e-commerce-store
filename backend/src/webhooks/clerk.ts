@@ -33,6 +33,7 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
 
     // throws if signature is wrong or body was tampered with; only then we trust evt.
     const evt = await verifyWebhook(request, { signingSecret: env.CLERK_WEBHOOK_SECRET });
+    console.info("Clerk webhook verified", { type: evt.type, id: (evt.data as { id?: string }).id });
 
     if (evt.type === "user.created" || evt.type === "user.updated") {
       const u = evt.data;
@@ -47,6 +48,10 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
 
       const role = parseRole(u.public_metadata?.role);
 
+      if (!email) {
+        console.warn("Clerk webhook user missing email", { clerkUserId: u.id });
+      }
+
       await db
         .insert(users)
         .values({
@@ -59,13 +64,16 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
           target: users.clerkUserId,
           set: { email, displayName, role, updatedAt: new Date() },
         });
-    }
 
-    if (evt.type === "user.deleted") {
+      console.info("Clerk webhook user synced", { clerkUserId: u.id, email });
+    } else if (evt.type === "user.deleted") {
       const id = evt.data.id;
       if (id) {
         await db.delete(users).where(eq(users.clerkUserId, id));
+        console.info("Clerk webhook user deleted", { clerkUserId: id });
       }
+    } else {
+      console.info("Clerk webhook ignored event type", evt.type);
     }
 
     res.json({ ok: true });

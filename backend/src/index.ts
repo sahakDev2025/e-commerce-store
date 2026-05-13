@@ -15,13 +15,15 @@ const app=express();
 
 
 
-const rawJson=express.raw({type:"application/json",limit:"1mb"});
+const rawJson = express.raw({ type: "*/*", limit: "1mb" });
 
-// it's important that you don't parse the webhook event data , it should be in the raw format
-
-
-app.post("/webhooks/clerk",rawJson,(req,res)=>{
-    void clerkWebhookHandler(req,res)
+// it's important that you don't parse the webhook event data; it should be in the raw format.
+app.post("/webhooks/clerk", rawJson, async (req, res, next) => {
+  try {
+    await clerkWebhookHandler(req, res);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.use(express.json());

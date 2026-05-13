@@ -10,6 +10,7 @@ const envSchema = z.object({
   CLERK_PUBLISHABLE_KEY: z.string().min(1),
   CLERK_SECRET_KEY: z.string().min(1),
   CLERK_WEBHOOK_SECRET: z.string().optional(),
+  CLERK_WEBHOOKS_SECRET: z.string().optional(),
 
   FRONTEND_URL: z.string().url(),
 
@@ -33,6 +34,7 @@ const envSchema = z.object({
 export type Env=z.infer<typeof envSchema>
 
 export function loadEnv(){
+    process.env.CLERK_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET ?? process.env.CLERK_WEBHOOKS_SECRET;
     const parsed=envSchema.safeParse(process.env)
 
     if(!parsed.success){
