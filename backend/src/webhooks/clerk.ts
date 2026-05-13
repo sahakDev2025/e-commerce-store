@@ -16,8 +16,14 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
       return;
     }
 
-    // Clerk's verifier expects a Web Request with the raw body; Express may give Buffer or string.
-    const payload = req.body instanceof Buffer ? req.body.toString("utf8") : String(req.body);
+    // Clerk's verifier expects a Web Request with the raw body; Express may give Buffer, string, or parsed JSON.
+    const rawBody = req.body;
+    const payload =
+      typeof rawBody === "string"
+        ? rawBody
+        : Buffer.isBuffer(rawBody)
+        ? rawBody.toString("utf8")
+        : JSON.stringify(rawBody);
 
     const request = new Request("http://internal/webhooks/clerk", {
       method: "POST",
@@ -33,7 +39,8 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
 
       const email =
         u.email_addresses?.find((e) => e.id === u.primary_email_address_id)?.email_address ??
-        u.email_addresses?.[0]?.email_address;
+        u.email_addresses?.[0]?.email_address ??
+        "";
 
       const displayName =
         [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || null;
