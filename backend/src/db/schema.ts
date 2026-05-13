@@ -28,21 +28,21 @@ export const products= pgTable("products",{
     slug:text("slug").notNull().unique(),
     name:text("name").notNull(),
     category: text("category").notNull().default("General"),
-    description:text("description").notNull().default(""),
+    description:text("description").notNull  ().default(""),
     priceCents:integer("price_cents").notNull(),
     currency:text("currency").notNull().default("usd"),
     imageUrl:text("image_url"),
     // imageKit `filed for deletes`
     imageKitFileId:text("image_kit_file_id"),
     active:boolean("active").notNull().default(true),
-    createdAt:timestamp("create_at",{withTimezone:true}).defaultNow().notNull(),
+    createdAt:timestamp("created_at",{withTimezone:true}).defaultNow().notNull(),
 });
 
 export const checkoutSessions=pgTable("checkout_sessions",{
     id:uuid("id").defaultRandom().primaryKey(),
     userId:uuid("user_id").notNull().references(()=>users.id , {onDelete:"cascade"}),
     polarCheckoutId:text("polar_checkout_id").unique(),
-    lines:jsonb("lines").$type<CheckoutSessionLine>().notNull(),
+    lines:jsonb("lines").$type<CheckoutSessionLine[]>().notNull(),
     totalCents:integer("total_cents").notNull(),
     currency:text("currency").notNull(),
     createdAt:timestamp('created_at',{withTimezone:true}).defaultNow().notNull()
@@ -59,11 +59,11 @@ export const orders=pgTable('orders',{
     polarOrderid:text("polar_order_id").unique(),
     totalCents:integer("total_cents").notNull().default(0),
     createdAt:timestamp("created_at",{withTimezone:true}).defaultNow().notNull(),
-    updatedAt:timestamp("update_at",{withTimezone:true}).defaultNow().notNull()
+    updatedAt:timestamp("updated_at",{withTimezone:true}).defaultNow().notNull()
 });
 
 
-export const orderItems=pgTable('orderItems',{
+export const orderItems=pgTable('order_items',{
     id:uuid('id').defaultRandom().primaryKey(),
     orderId:uuid('order_id').notNull().references(()=>orders.id,{onDelete:"cascade"}),
     productId:uuid('product_id').notNull().references(()=>products.id,{onDelete:"restrict"}),
@@ -83,7 +83,7 @@ export const productsRelations = relations(products,({many})=>({
     orderItems:many(orderItems)
 }));
 
-//each order belogs to exactly one ueser; each order can have many line items
+//each order belogs to exactly one user; each order can have many line items
 
 export const ordersRelations= relations(orders,({one,many})=>({
     user:one(users,{fields:[orders.userId],references:[users.id]}),
@@ -96,7 +96,7 @@ export const ordersRelations= relations(orders,({one,many})=>({
 
 export const orderItemsRelations=relations(orderItems,({one})=>({
     order:one(orders,{fields:[orderItems.orderId],references:[orders.id]}),
-    products:one(products,{fields:[orderItems.productId],references:[products.id]})
+    product:one(products,{fields:[orderItems.productId],references:[products.id]})
 }))
 
 

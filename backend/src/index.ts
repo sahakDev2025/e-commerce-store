@@ -1,14 +1,31 @@
+import "dotenv/config";
 import express from 'express';
+import cors from "cors"
 
+import { clerkMiddleware } from '@clerk/express';
+import { clerkWebhookHandler } from './webhooks/clerk';
+import { getEnv } from './lib/env';
+
+
+const env=getEnv();
 const app=express();
 
 app.get('/',(req,res)=>{
     res.send("hello Developer")
-})
+});
+
+const rawJson=express.raw({type:"application/json",limit:"1mb"});
+
+// it's important that you don't parse the webhook event data , it should be in the raw format
 
 
-const PORT=process.env.PORT || 3000;
+app.post("/webhooks/clerk",rawJson,(req,res)=>{
+    void clerkWebhookHandler(req,res)
+});
 
-app.listen(PORT,()=>{
-    console.log(`Server is running on PORT :${PORT}`)
-})
+app.use(express.json());
+app.use(clerkMiddleware());
+app.use(cors());
+
+
+app.listen(env.PORT, ()=> console.log(`Listing on port 3001`))
