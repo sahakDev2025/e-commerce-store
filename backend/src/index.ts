@@ -4,7 +4,6 @@ import cors from "cors"
 // this import build the packages or moudules
 import fs from "node:fs";
 import path from "node:path";
-
 import { clerkMiddleware } from '@clerk/express';
 import { clerkWebhookHandler } from './webhooks/clerk';
 import { getEnv } from './lib/env';
@@ -12,9 +11,6 @@ import { getEnv } from './lib/env';
 
 const env=getEnv();
 const app=express();
-
-
-
 const rawJson = express.raw({ type: "*/*", limit: "1mb" });
 
 // it's important that you don't parse the webhook event data; it should be in the raw format.
