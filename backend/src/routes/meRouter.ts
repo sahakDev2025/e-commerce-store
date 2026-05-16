@@ -1,5 +1,5 @@
 import { getAuth } from "@clerk/express";
-import { Router, NextFunction } from "express";
+import { Router } from "express";
 import { getLocalUser } from "../lib/users";
 
 
