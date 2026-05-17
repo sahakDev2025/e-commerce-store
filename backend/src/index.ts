@@ -15,6 +15,7 @@ import meRouter from "./routes/meRouter";
 import productRouter from "./routes/productRouter";
 import streamRouter from "./routes/streamRouter";
 import checkoutRouter from "./routes/checkoutRouter";
+import { polarWebhookHandler } from "./webhooks/polar";
 
 
 
@@ -32,13 +33,13 @@ app.post("/webhooks/clerk", rawJson, async (req, res, next) => {
 });
 
 
-// app.post("/webhooks/polar", rawJson, async (req, res, next) => {
-//   try {
-//     await polarWebhookHandler(req, res);
-//   } catch (err) {
-//     next(err);
-//   }
-// });
+app.post("/webhooks/polar", rawJson, async (req, res, next) => {
+  try {
+    await polarWebhookHandler(req, res);
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.use(express.json());
 app.use(clerkMiddleware());
