@@ -14,6 +14,7 @@ import keepAliveCron from "./lib/cron"
 import meRouter from "./routes/meRouter";
 import productRouter from "./routes/productRouter";
 import streamRouter from "./routes/streamRouter";
+import checkoutRouter from "./routes/checkoutRouter";
 
 
 
@@ -30,6 +31,15 @@ app.post("/webhooks/clerk", rawJson, async (req, res, next) => {
   }
 });
 
+
+// app.post("/webhooks/polar", rawJson, async (req, res, next) => {
+//   try {
+//     await polarWebhookHandler(req, res);
+//   } catch (err) {
+//     next(err);
+//   }
+// });
+
 app.use(express.json());
 app.use(clerkMiddleware());
 app.use(cors());
@@ -40,6 +50,7 @@ app.get("/health",(_req,res)=>{
 app.use("/api/me",meRouter);
 app.use("/api/products",productRouter);
 app.use("/api/stream",streamRouter);
+app.use("/api/checkout",checkoutRouter);
 
 
 
