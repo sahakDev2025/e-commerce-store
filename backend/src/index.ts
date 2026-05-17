@@ -22,6 +22,8 @@ import { polarWebhookHandler } from "./webhooks/polar";
 const env=getEnv();
 const app=express();
 const rawJson = express.raw({ type: "*/*", limit: "1mb" });
+import * as Sentry from "@sentry/node"
+import { sentryClerkUserMiddleware } from "./middleware/sentyClerkUser";
 
 // it's important that you don't parse the webhook event data; it should be in the raw format.
 app.post("/webhooks/clerk", rawJson, async (req, res, next) => {
@@ -43,6 +45,7 @@ app.post("/webhooks/polar", rawJson, async (req, res, next) => {
 
 app.use(express.json());
 app.use(clerkMiddleware());
+app.use(sentryClerkUserMiddleware);
 app.use(cors());
 app.get("/health",(_req,res)=>{
     res.json({ok:true})
@@ -73,7 +76,20 @@ if(fs.existsSync(publicDir)){
     });
 }
 
+Sentry.setupExpressErrorHandler(app);
 //todo: add error handler middleware
+
+app.use(
+  (_err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    const sentryId = (res as express.Response & { sentry?: string }).sentry;
+
+    res.status(500).json({
+      error: "Internal server error",
+      ...(sentryId !== undefined && { sentryId }),
+    });
+  },
+);
+
 
 app.listen(env.PORT, ()=> {
     console.log(`Listing on port 3001`);
