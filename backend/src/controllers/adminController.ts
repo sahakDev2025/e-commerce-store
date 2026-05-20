@@ -31,7 +31,9 @@ const productCreate = z.object({
 const productPatch=productCreate.partial();
 
 function buildProductUpdateSet(body: z.infer<typeof productPatch>) {
+  
   const data: Partial<typeof products.$inferInsert> = {};
+
   if (body.slug !== undefined) data.slug = body.slug;
   if (body.name !== undefined) data.name = body.name;
   if (body.category !== undefined) data.category = body.category;
